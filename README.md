@@ -9,7 +9,7 @@ Tiek izmantotas šādas galvenās tabulas un procedūras:
 - **mview_refresh_log** – atjaunošanas žurnāls, kurā tiek reģistrēti notikumu laiki, statusi un kļūdu ziņojumi
 - **set_mview_refresh_queue_ready** – procedūra, kas iestata visu rindas ierakstu statusu uz `ready`, gatavojot tos atjaunošanai
 - **run_mview_refresh_queue** – procedūra, kas secīgi apstrādā rindas ierakstus, ievērojot atkarības un atjauno skatus
-
+- **update_status** – procedūra, kas atjaunina statusu rindā un vienlaikus saglabā reģistru logā (ar kļūdu apstrādi)
 
 ## Procedūra run_mview_refresh_queue
 
