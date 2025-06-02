@@ -1,5 +1,8 @@
-CREATE OR REPLACE PROCEDURE EDUARDS.run_mview_refresh_queue AS 
+CREATE OR REPLACE PROCEDURE run_mview_refresh_queue AS 
 	l_mview_name mview_refresh_queue.mview_name%TYPE := NULL;
+	e_object_does_not_exist EXCEPTION;
+	PRAGMA EXCEPTION_INIT(e_object_does_not_exist, -942);
+
 BEGIN
     LOOP
         BEGIN
@@ -30,23 +33,37 @@ BEGIN
             END IF;
 
             COMMIT;
-
-        END;
-
+        END;  
+        
         BEGIN
-            dbms_output.put_line ('refresing: ' || l_mview_name);
-            --dbms_mview.refresh(l_mview_name, METHOD => 'C', ATOMIC_REFRESH => FALSE);
+	       drop_indexes(l_mview_name);   
+           save_refresh_trace(l_mview_name, 'in progress', 'dropped indexes and starting refresh.');
+           --Placeholder: here dbms_mview.refresh would be invoked in production
+           --dbms_mview.refresh(l_mview_name, METHOD => 'C', ATOMIC_REFRESH => FALSE);
+           save_refresh_trace(l_mview_name, 'done', 'refreshing completed.');
+
         UPDATE mview_refresh_queue
         SET status = 'done'
         WHERE mview_name = l_mview_name;
 
         EXCEPTION
+        	WHEN e_object_does_not_exist THEN
+        		save_refresh_trace(l_mview_name, 'error', 'mview does not exist.');
+        		UPDATE mview_refresh_queue
+                SET status = 'error'
+                WHERE mview_name = l_mview_name;
             WHEN OTHERS THEN
+                save_refresh_trace(l_mview_name, 'error', 'refresh error:' || SQLERRM);
                 UPDATE mview_refresh_queue
                 SET status = 'error'
                 WHERE mview_name = l_mview_name;
         END;
-
+		
+        IF SQL%ROWCOUNT > 0 THEN
+        create_indexes(l_mview_name);
+        save_refresh_trace(l_mview_name, 'done', 'created indexes.');
+        END IF;
+        
         COMMIT;
 
     END LOOP;
