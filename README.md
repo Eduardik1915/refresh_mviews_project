@@ -11,13 +11,13 @@ Tiek izmantotas šādas galvenās tabulas un procedūras:
 - **run_mview_refresh_queue** – procedūra, kas secīgi apstrādā rindas ierakstus, ievērojot atkarības un atjauno skatus
 
 
-# Procedūra run_mview_refresh_queue
+## Procedūra run_mview_refresh_queue
 
-## Apraksts  
+### Apraksts  
 Procedūra nodrošina materializēto skatu (materialized views) secīgu atjaunošanu, izmantojot rindu gaidīšanas tabulu `mview_refresh_queue`.  
 Tā atlasa materializēto skatu ar statusu `ready`, pārbauda atkarības, maina statusu uz `in progress`, veic atjaunošanu, reģistrē procesu un maina statusu uz `done` vai `error` atkarībā no rezultāta.
 
-## Procedūras galvenie soļi  
+### Procedūras galvenie soļi  
 - Atlasa materializēto skatu ar statusu `ready` un bez neatjaunotām atkarībām  
 - Maina statusu uz `in progress`  
 - Izsauc (komentāros atstāts) `dbms_mview.refresh` materializētā skata atjaunošanai  
@@ -25,18 +25,18 @@ Tā atlasa materializēto skatu ar statusu `ready`, pārbauda atkarības, maina 
 - Veic darbību reģistrāciju tabulā `mview_refresh_log`  
 - Maina statusu rindā uz `done` vai `error`  
 
-## Svarīgi  
+### Svarīgi  
 - `dbms_mview.refresh` izsaukums ir komentētā veidā un jāieslēdz ražošanas vidē  
 - Funkcijas `drop_indexes`, `create_indexes`, `save_refresh_trace` pašlaik ir pagaidu aizvietotāji, kurus vajadzības gadījumā var aizstāt ar pilnvērtīgām realizācijām  
 - Procedūra darbojas cikliski, līdz rindā vairs nav materializēto skatu, kas jāatjauno
 - Procedūru `set_mview_refresh_queue_ready` ir jāizsauc katru reizi pirms `run_mview_refresh_queue` palaišanas, lai sagatavotu atjaunošanas rindu
 
-## Testēšanas dati
+### Testēšanas dati
 Projektā ir iekļauts fails `data.sql`, kurā atrodami testa dati tabulām `mview_refresh_queue` un `mview_dependency_map`.  
 Šie dati balstās uz reālajiem vai piemēra datiem no `existing.sql` un ir paredzēti, lai pārbaudītu materializēto skatu atjaunošanas loģiku un atkarību apstrādi.
 Lai veiktu testa palaišanu, vispirms ielādējiet `data.sql` datubāzē.
 
-## Piemērs izsaukumam  
+### Piemērs izsaukumam  
 ```sql
 BEGIN
     run_mview_refresh_queue;
